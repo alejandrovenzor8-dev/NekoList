@@ -1,42 +1,62 @@
 # NekoList 🐱
 
-A modern web application for tracking and managing your personal anime lists, powered by the AniList GraphQL API.
+Una aplicación web moderna para rastrear y gestionar tus listas personales de anime, impulsada por la API GraphQL de AniList.
 
-## Features
+## Características
 
-- 🔍 **Search & Discover** anime with advanced filters (genre, year, popularity)
-- 📋 **Personal Lists** - Track anime as Watched, Watching, or Plan to Watch
-- ⭐ **Rating & Reviews** - Rate anime 1-10 and write reviews
-- ❤️ **Favorites** - Mark your favorite anime
-- 📊 **Dashboard** - View your stats and activity
-- 🌙 **Dark Mode** - Beautiful dark UI by default
+- 🔍 **Buscar y descubrir** anime con filtros avanzados (género, año, popularidad)
+- 📋 **Listas personales** - Rastrea anime como Visto, Viendo o Planeo ver
+- ⭐ **Calificaciones y reseñas** - Califica anime del 1 al 10 y escribe reseñas
+- ❤️ **Favoritos** - Marca tu anime favorito
+- 📊 **Panel** - Visualiza tus estadísticas y actividad
+- 🌙 **Modo oscuro** - Interfaz oscura atractiva por defecto
 
-## Architecture
+## Arquitectura
 
-This app follows a reference-only data architecture:
-- The database **only stores** user references (animeId, status, rating, review)
-- All anime info (title, image, description) is fetched **in real-time** from AniList API
-- Results are cached to minimize API calls
+Esta app sigue una arquitectura de datos basada solo en referencias:
+- La base de datos **solo almacena** referencias del usuario (animeId, estado, calificación, reseña)
+- Toda la información del anime (título, imagen, descripción) se obtiene **en tiempo real** desde la API de AniList
+- Los resultados se almacenan en caché para minimizar llamadas a la API
 
 ## Tech Stack
 
 - **Frontend**: React + Vite, Tailwind CSS, Axios
-- **Backend**: Node.js + Express, JWT authentication
+- **Backend**: Node.js + Express, autenticación JWT
 - **Database**: MongoDB (Mongoose)
 - **API**: AniList GraphQL API
 
 ## Setup
 
-### Prerequisites
+### Requisitos previos
 - Node.js 18+
-- MongoDB (local or Atlas)
+- MongoDB (local o Atlas)
+
+### MongoDB con Docker (opcional recomendado)
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up -d
+```
+
+Para detener MongoDB:
+
+```bash
+docker compose down
+```
+
+Tu backend ya está preparado para conectarse con:
+
+```bash
+MONGODB_URI=mongodb://localhost:27017/nekolist
+```
 
 ### Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your MongoDB URI and JWT secret
+# Edita .env con tu URI de MongoDB y tu secreto JWT
 npm install
 npm run dev
 ```
@@ -49,9 +69,9 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Abre http://localhost:5173
 
-## Environment Variables
+## Variables de entorno
 
 ### Backend (.env)
 ```
@@ -64,18 +84,18 @@ JWT_EXPIRES_IN=7d
 ## API Endpoints
 
 ### Auth
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login
-- `GET /api/auth/me` - Get current user
+- `POST /api/auth/register` - Registrar nuevo usuario
+- `POST /api/auth/login` - Iniciar sesión
+- `GET /api/auth/me` - Obtener usuario actual
 
-### Anime List (requires JWT)
-- `GET /api/list` - Get user's list
-- `GET /api/list/stats` - Get user stats
-- `GET /api/list/:animeId` - Get specific entry
-- `POST /api/list` - Add to list
-- `PUT /api/list/:animeId` - Update entry
-- `DELETE /api/list/:animeId` - Remove from list
+### Lista de anime (requiere JWT)
+- `GET /api/list` - Obtener lista del usuario
+- `GET /api/list/stats` - Obtener estadísticas del usuario
+- `GET /api/list/:animeId` - Obtener entrada específica
+- `POST /api/list` - Añadir a la lista
+- `PUT /api/list/:animeId` - Actualizar entrada
+- `DELETE /api/list/:animeId` - Eliminar de la lista
 
 ### AniList Proxy
-- `POST /api/anilist` - Proxy GraphQL queries to AniList
-pagina para enlistar animes vistos y calificarlos
+- `POST /api/anilist` - Proxy de consultas GraphQL hacia AniList
+Página para enlistar animes vistos y calificarlos.

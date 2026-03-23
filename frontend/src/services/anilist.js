@@ -1,5 +1,59 @@
 import axios from 'axios'
 
+const ANILIST_ENDPOINT = 'https://graphql.anilist.co'
+const anilistClient = axios.create({
+  baseURL: ANILIST_ENDPOINT,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+  timeout: 10000,
+})
+
+const proxyClient = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+  timeout: 10000,
+})
+
+export const fetchFromAniList = async (query, variables = {}) => {
+  const payload = { query, variables }
+
+  try {
+    // Prefer backend proxy to avoid browser/CORS network failures.
+    const response = await proxyClient.post('/anilist', payload)
+
+    if (response.data?.errors?.length) {
+      throw new Error(response.data.errors[0]?.message || 'AniList GraphQL error')
+    }
+
+    return response.data
+  } catch (proxyError) {
+    try {
+      // Fallback to direct AniList endpoint when backend is unavailable.
+      const directResponse = await anilistClient.post('', payload)
+
+      if (directResponse.data?.errors?.length) {
+        throw new Error(directResponse.data.errors[0]?.message || 'AniList GraphQL error')
+      }
+
+      return directResponse.data
+    } catch (directError) {
+      const message = directError.response?.data?.errors?.[0]?.message
+        || directError.response?.data?.message
+        || proxyError.response?.data?.message
+        || directError.message
+        || proxyError.message
+        || 'No se pudo consultar AniList'
+
+      throw new Error(message)
+    }
+  }
+}
+
 // Simple in-memory cache
 const cache = new Map()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
@@ -10,9 +64,9 @@ const cachedQuery = async (query, variables = {}) => {
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.data
   }
-  const response = await axios.post('/api/anilist', { query, variables })
-  cache.set(key, { data: response.data, timestamp: Date.now() })
-  return response.data
+  const data = await fetchFromAniList(query, variables)
+  cache.set(key, { data, timestamp: Date.now() })
+  return data
 }
 
 export const searchAnime = (search, page = 1, perPage = 20, genre = null, year = null, sort = ['POPULARITY_DESC']) => {
@@ -65,6 +119,56 @@ export const getTrendingAnime = (page = 1, perPage = 20) =>
     }`,
     { page, perPage }
   )
+
+export const getPopularAnime = (page = 1, perPage = 12, genre = null) => {
+  const variables = { page, perPage }
+  if (genre) variables.genre = genre
+
+  return cachedQuery(
+    `query ($page: Int, $perPage: Int, $genre: String) {
+      Page(page: $page, perPage: $perPage) {
+        media(type: ANIME, sort: POPULARITY_DESC, genre: $genre) {
+          id
+          title { romaji english native }
+          coverImage { large medium }
+          genres
+          seasonYear
+          popularity
+          averageScore
+          status
+          episodes
+          format
+        }
+      }
+    }`,
+    variables
+  )
+}
+
+export const getNewestAnime = (page = 1, perPage = 12, genre = null) => {
+  const variables = { page, perPage }
+  if (genre) variables.genre = genre
+
+  return cachedQuery(
+    `query ($page: Int, $perPage: Int, $genre: String) {
+      Page(page: $page, perPage: $perPage) {
+        media(type: ANIME, sort: START_DATE_DESC, genre: $genre) {
+          id
+          title { romaji english native }
+          coverImage { large medium }
+          genres
+          seasonYear
+          popularity
+          averageScore
+          status
+          episodes
+          format
+        }
+      }
+    }`,
+    variables
+  )
+}
 
 export const getAnimeById = (id) =>
   cachedQuery(

@@ -1,0 +1,14 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: nekolist-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: nekolist
+    volumes:
+      - nekolist_mongo_data:/data/db
+
+volumes:
+  nekolist_mongo_data:

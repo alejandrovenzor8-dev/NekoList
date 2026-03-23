@@ -31,7 +31,10 @@ app.post('/api/anilist', async (req, res) => {
     const data = await anilistQuery(query, variables);
     res.json(data);
   } catch (error) {
-    res.status(500).json({ message: 'AniList API error', error: error.message });
+    const status = error.response?.status || 500;
+    const graphQLError = error.response?.data?.errors?.[0]?.message;
+    const message = graphQLError || error.response?.data?.message || error.message || 'AniList API error';
+    res.status(status).json({ message, error: error.message });
   }
 });
 
