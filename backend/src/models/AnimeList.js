@@ -13,7 +13,7 @@ const animeListSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['visto', 'viendo', 'por_ver', 'favorito'],
+      enum: ['visto', 'viendo', 'por_ver'],
       required: true,
     },
     rating: {

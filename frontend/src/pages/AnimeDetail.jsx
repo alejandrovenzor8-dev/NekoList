@@ -170,7 +170,7 @@ export default function AnimeDetail() {
       {anime.description && (
         <div className="mb-8 p-6 bg-neko-card rounded-xl">
           <h2 className="text-lg font-semibold mb-3">Synopsis</h2>
-          <p className="text-neko-muted leading-relaxed text-sm">{anime.description.replace(/<[^>]*>/g, '')}</p>
+          <p className="text-neko-muted leading-relaxed text-sm">{anime.description.replace(/<[^>]+>|<(?=[^>]*$)/gi, '')}</p>
         </div>
       )}
 

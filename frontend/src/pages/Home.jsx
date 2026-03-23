@@ -68,7 +68,7 @@ export default function Home() {
 
   useEffect(() => {
     if (page > 1) fetchAnime(query, page, filters)
-  }, [page])
+  }, [page, fetchAnime, query, filters])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
